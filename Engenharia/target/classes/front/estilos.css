@@ -1,0 +1,124 @@
+/* Estilos gerais para todas as páginas */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 30px;
+    text-align: center;
+}
+
+h1, h2 {
+    color: #333;
+}
+
+/* Estilos dos botões de configuração_sistema.html */
+.button {
+    display: inline-block;
+    margin: 20px;
+    padding: 15px 30px;
+    font-size: 16px;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos dos formulários em aparencia_sistema.html e dados_hospital.html */
+form {
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="color"] {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    box-sizing: border-box;
+}
+
+/* Botão dos formulários */
+button {
+    margin-top: 30px;
+    padding: 10px 20px;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.aparencia button {
+    background-color: #007bff;
+}
+
+.aparencia button:hover {
+    background-color: #0056b3;
+}
+
+.hospital button {
+    background-color: #28a745;
+}
+
+.hospital button:hover {
+    background-color: #1e7e34;
+}
+
+button {
+    background-color: #007bff; /* azul */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+header, footer {
+    padding: 10px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+header img {
+    height: 50px;
+}
+#cabecalho-sistema {
+    background-color: #1f8f8f;
+    padding: 10px;
+}
+
+#cabecalho-conteudo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px; /* Espaço entre imagem e texto */
+}
+
+#logoInstituicao {
+    height: 50px; /* Reduz o tamanho para caber na linha */
+    width: auto;
+}
+
+#nomeInstituicao {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+}
