@@ -1,19 +1,42 @@
 package com.example.saim.Models.Service;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.*;
 
 public class Conexao {
-    private static final String URL = "jdbc:postgresql://localhost:5432/engII";
-    private static final String USUARIO = "postgres";
-    private static final String SENHA = "Postgres123";
+    private Connection connection;
 
-    public static Connection conectar() {
+    public boolean conectar(String url, String dbName, String user, String password) {
         try {
             Class.forName("org.postgresql.Driver");
-            return DriverManager.getConnection(URL, USUARIO, SENHA);
+            connection = DriverManager.getConnection(url + dbName, user, password);
+            return true;
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao conectar ao banco de dados: " + e.getMessage());
+            e.printStackTrace();
+            return false;
         }
+    }
+
+    public boolean manipular(String sql) {
+        try (Statement stmt = connection.createStatement()) {
+            stmt.executeUpdate(sql);
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public ResultSet consultar(String sql) {
+        try {
+            Statement stmt = connection.createStatement();
+            return stmt.executeQuery(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

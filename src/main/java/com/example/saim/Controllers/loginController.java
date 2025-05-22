@@ -23,9 +23,9 @@ public class loginController {
     private UsuarioService usuarioService;
 
     @PostMapping(value = "login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequest usuarioService) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequest loginRequest) {
 
-        //return ResponseEntity.ok(jwtTokenProvider.makeToken(user.getId(),user.getName()));
+        return ResponseEntity.ok(jwtTokenProvider.makeToken(loginRequest.getId(),user.getName()));
     }
     @PostMapping(value = "cadastro")
     public ResponseEntity<Object> add(@RequestBody Usuario user) {

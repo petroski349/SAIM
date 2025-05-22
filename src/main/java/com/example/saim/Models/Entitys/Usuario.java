@@ -1,9 +1,6 @@
 package com.example.saim.Models.Entitys;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-
+import java.sql.Date;
 import java.time.LocalDateTime;
 
 
@@ -26,19 +23,19 @@ public class Usuario {
 
     public Usuario() {}
 
-    public char getTipo() {
+    public CharSequence getTipo() {
         return tipo;
     }
 
-    public void setTipo(char tipo) {
+    public void setTipo(String tipo) {
         this.tipo = tipo;
     }
 
-    public LocalDateTime getDataRegistro() {
+    public CharSequence getDataRegistro() {
         return dataRegistro;
     }
 
-    public void setDataRegistro(LocalDateTime dataRegistro) {
+    public void setDataRegistro(Date dataRegistro) {
         this.dataRegistro = dataRegistro;
     }
 
@@ -66,7 +63,7 @@ public class Usuario {
         this.nome = nome;
     }
 
-    public long getId() {
+    public CharSequence getId() {
         return id;
     }
 
