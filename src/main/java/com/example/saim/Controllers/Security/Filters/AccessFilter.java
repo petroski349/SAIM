@@ -15,7 +15,7 @@ public class AccessFilter implements Filter {
         HttpServletRequest req = (HttpServletRequest) request;
         String token = req.getHeader("Authorization");
         System.out.println("token -> "+token);
-        if (token == null || !JWTTokenProvider.verifyToken(token)) {
+        if (token == null || !JWTTokenProvider.validateToken(token)) {
             ((HttpServletResponse)response).setStatus(500);
             response.getOutputStream().write("Não autorizado ".getBytes());
         } else {

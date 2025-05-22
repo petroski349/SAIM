@@ -23,19 +23,19 @@ public class Usuario {
 
     public Usuario() {}
 
-    public CharSequence getTipo() {
+    public char getTipo() {
         return tipo;
     }
 
-    public void setTipo(String tipo) {
+    public void setTipo(char tipo) {
         this.tipo = tipo;
     }
 
-    public CharSequence getDataRegistro() {
+    public LocalDateTime getDataRegistro() {
         return dataRegistro;
     }
 
-    public void setDataRegistro(Date dataRegistro) {
+    public void setDataRegistro(LocalDateTime dataRegistro) {
         this.dataRegistro = dataRegistro;
     }
 
@@ -63,7 +63,7 @@ public class Usuario {
         this.nome = nome;
     }
 
-    public CharSequence getId() {
+    public long getId() {
         return id;
     }
 

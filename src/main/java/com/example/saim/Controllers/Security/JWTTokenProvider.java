@@ -14,58 +14,78 @@ import java.util.Date;
 @Component
 public class JWTTokenProvider {
 
-    private static final SecretKey CHAVE = Keys.hmacShaKeyFor(
+    private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(
             "MINHACHAVESECRETA_MINHACHAVESECRETA".getBytes(StandardCharsets.UTF_8));
 
-    static public String makeToken(Long userId, String nome) {
-        String jwtToken = Jwts.builder()
-                .setSubject(String.valueOf(userId)) // Define o ID como o subject
+    /**
+     * Gera o token JWT para o usuário, usando seu ID e email (ou nome)
+     */
+    public static String generateToken(Long usuarioId, String email) {
+        return Jwts.builder()
+                .setSubject(String.valueOf(usuarioId))  // Coloca o ID do usuário como subject
                 .setIssuer("localhost:8080")
-                .claim("nome", nome)
+                .claim("email", email)                   // Guarda o email como claim
                 .setIssuedAt(new Date())
-                .setExpiration(Date.from(LocalDateTime.now().plusMinutes(10L)
+                .setExpiration(Date.from(LocalDateTime.now().plusMinutes(60L)  // Token válido por 60 min
                         .atZone(ZoneId.systemDefault()).toInstant()))
-                .signWith(CHAVE) // Assina o token com a chave secreta
+                .signWith(SECRET_KEY)
                 .compact();
-        return jwtToken;
     }
 
-
-    static public boolean verifyToken(String token)
-    {
-        System.out.println("verifyToken");
+    /**
+     * Verifica se o token é válido (assinatura correta e não expirado)
+     */
+    public static boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(CHAVE)
+                    .setSigningKey(SECRET_KEY)
                     .build()
-                    .parseClaimsJws(token).getSignature();
+                    .parseClaimsJws(token);
             return true;
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println("Token inválido: " + e.getMessage());
         }
         return false;
     }
 
-    static public Claims getAllClaimsFromToken(String token)
-    {
-        Claims claims=null;
+    /**
+     * Obtém os claims do token JWT
+     */
+    public static Claims getClaims(String token) {
         try {
-            claims = Jwts.parserBuilder()
-                    .setSigningKey(CHAVE)
+            return Jwts.parserBuilder()
+                    .setSigningKey(SECRET_KEY)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            System.out.println("Erro ao recuperar as informações (claims)");
+            System.out.println("Erro ao obter claims do token: " + e.getMessage());
+            return null;
         }
-        return claims;
     }
 
-    static public Long getUserId(String Authorization){
-        Claims claims = getAllClaimsFromToken(Authorization);
-        String userIdString = claims.getSubject(); // Recupera o "subject"
-        Long userId = Long.parseLong(userIdString); // Converte para Long, se necessário
-        return  userId;
+    /**
+     * Obtém o ID do usuário a partir do token JWT (subject)
+     */
+    public static Long getUsuarioId(String token) {
+        Claims claims = getClaims(token);
+        if (claims == null) return null;
+
+        String userIdStr = claims.getSubject();
+        try {
+            return Long.parseLong(userIdStr);
+        } catch (NumberFormatException e) {
+            System.out.println("ID de usuário inválido no token");
+            return null;
+        }
+    }
+
+    /**
+     * Opcional: obter o email do usuário pelo claim
+     */
+    public static String getEmail(String token) {
+        Claims claims = getClaims(token);
+        if (claims == null) return null;
+        return claims.get("email", String.class);
     }
 }
-
