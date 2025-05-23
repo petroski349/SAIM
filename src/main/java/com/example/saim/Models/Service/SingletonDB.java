@@ -15,9 +15,9 @@ public class SingletonDB
             conexao = new Conexao();
             boolean conectado = conexao.conectar(
                     "jdbc:postgresql://localhost:5432/",
-                    "trab_saim",
+                    "engII",
                     "postgres",
-                    "postgres123"
+                    "Postgres123"
             );
             if (!conectado) {
                 System.err.println("❌ Falha ao conectar ao banco de dados!");

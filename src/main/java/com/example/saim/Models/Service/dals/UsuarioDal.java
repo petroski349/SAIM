@@ -4,6 +4,8 @@ import com.example.saim.Models.Entitys.Usuario;
 import com.example.saim.Models.Service.SingletonDB;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -11,32 +13,54 @@ import java.util.List;
 @Service
 public class UsuarioDal implements IDAL<Usuario> {
 
+
     @Override
     public boolean create(Usuario usuario) {
-        // Formata dataRegistro para string ISO, se null usa CURRENT_DATE
-        String dataFormatada = usuario.getDataRegistro() != null
-                ? usuario.getDataRegistro().toString()  // ex: "2025-05-22T15:30:00"
-                : "CURRENT_DATE";
+        // Limpeza dos dados para garantir que não haja caracteres nulos ou inválidos
+        String senha = limpaEntrada(usuario.getSenha());
+        String email = limpaEntrada(usuario.getEmail());
+        String nome = limpaEntrada(usuario.getNome());
 
         String sql = """
-            INSERT INTO usuario (senha, email, data_registro, tipo)
-            VALUES ('#1', '#2', '#3', '#4');
-            """;
+    INSERT INTO usuario (senha, email, tipo, nome)
+    VALUES (?, ?, ?, ?);
+    """;
 
-        sql = sql.replace("#1", usuario.getSenha());
-        sql = sql.replace("#2", usuario.getEmail());
+        try (Connection con = SingletonDB.getConexao().getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        // Se for CURRENT_DATE, não deve estar entre aspas no SQL
-        if ("CURRENT_DATE".equals(dataFormatada)) {
-            sql = sql.replace("'#3'", dataFormatada);
-        } else {
-            sql = sql.replace("#3", dataFormatada);
+            // Define os parâmetros do PreparedStatement
+            ps.setString(1, senha);  // Senha
+            ps.setString(2, email);  // Email
+            ps.setString(3, String.valueOf(usuario.getTipo()));  // Tipo (char)
+            ps.setString(4, nome);   // Nome
+
+            // Executa a atualização no banco
+            int rowsAffected = ps.executeUpdate();
+
+            return rowsAffected > 0;  // Retorna true se a inserção foi bem-sucedida
+
+        } catch (SQLException e) {
+            e.printStackTrace();  // Imprime o erro
+            return false;  // Retorna false se houver erro
         }
-
-        sql = sql.replace("#4", String.valueOf(usuario.getTipo()));
-
-        return SingletonDB.getConexao().manipular(sql);
     }
+
+    private String limpaEntrada(String entrada) {
+        if (entrada == null) return "";
+
+        // Remove caracteres nulos e caracteres não ASCII e de controle
+        entrada = entrada.replaceAll("[^\\x20-\\x7E\\x0A\\x0D]", "");  // Limpa caracteres não ASCII e de controle
+        entrada = entrada.replace("\0", "");  // Remove caracteres nulos explicitamente
+
+        return entrada;
+    }
+
+
+
+
+
+
 
     @Override
     public boolean updateSenha(Usuario usuario) {
@@ -65,49 +89,11 @@ public class UsuarioDal implements IDAL<Usuario> {
     }
 
     @Override
-    public Usuario filterGet(int id) {
-        String sql = "SELECT * FROM usuario WHERE id = " + id + ";";
-
-        ResultSet rs = SingletonDB.getConexao().consultar(sql);
-        Usuario usuario = null;
-
-        try {
-            if (rs != null && rs.next()) {
-                usuario = new Usuario();
-                usuario.setId(rs.getInt("id"));
-                usuario.setSenha(rs.getString("senha"));
-                usuario.setEmail(rs.getString("email"));
-
-                // Usa getTimestamp para pegar data e hora corretamente
-                if (rs.getTimestamp("data_registro") != null) {
-                    usuario.setDataRegistro(rs.getTimestamp("data_registro").toLocalDateTime());
-                }
-
-                String tipoStr = rs.getString("tipo");
-                if (tipoStr != null && !tipoStr.isEmpty()) {
-                    usuario.setTipo(tipoStr.charAt(0));
-                }
-
-                usuario.setNome(rs.getString("nome"));
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return usuario;
-    }
-
-    @Override
-    public List<Usuario> filterGet(String filtro) {
-        return List.of();
-    }
-
-    @Override
     public Usuario getByLogin(String login) {
         String sql = """
-            SELECT * FROM usuario
-            WHERE email = '#1';
-            """;
+        SELECT * FROM usuario
+        WHERE email = '#1';
+    """;
 
         sql = sql.replace("#1", login);
 
@@ -120,13 +106,10 @@ public class UsuarioDal implements IDAL<Usuario> {
                 usuario.setSenha(rs.getString("senha"));
                 usuario.setEmail(rs.getString("email"));
 
-                if (rs.getTimestamp("data_registro") != null) {
-                    usuario.setDataRegistro(rs.getTimestamp("data_registro").toLocalDateTime());
-                }
-
+                // Modificado para tratar 'tipo' como String
                 String tipoStr = rs.getString("tipo");
                 if (tipoStr != null && !tipoStr.isEmpty()) {
-                    usuario.setTipo(tipoStr.charAt(0));
+                    usuario.setTipo(tipoStr);  // Agora o tipo é uma String, não um char
                 }
 
                 usuario.setId(rs.getInt("id"));
@@ -138,4 +121,36 @@ public class UsuarioDal implements IDAL<Usuario> {
 
         return usuario;
     }
+
+
+    @Override
+    public Usuario filterGet(int id) {
+        // SQL para selecionar o usuário com base no id
+        String sql = "SELECT * FROM usuario WHERE id = ?;";
+
+        // Executa a consulta no banco de dados
+        ResultSet rs = SingletonDB.getConexao().consultar(sql);
+        Usuario usuario = null;
+
+        try {
+            if (rs != null && rs.next()) {
+                usuario = new Usuario();
+                usuario.setId(rs.getInt("id"));
+                usuario.setSenha(rs.getString("senha"));
+                usuario.setEmail(rs.getString("email"));
+
+                String tipoStr = rs.getString("tipo");
+                if (tipoStr != null && !tipoStr.isEmpty()) {
+                    usuario.setTipo(tipoStr);  // Agora tipo é uma String, não um char
+                }
+                usuario.setNome(rs.getString("nome"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  // Registra o erro caso algo aconteça durante a consulta
+        }
+
+        return usuario;
+    }
+
+
 }

@@ -11,9 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/acesso")
 public class LoginController {
 
     @Autowired
@@ -26,8 +27,16 @@ public class LoginController {
 
         Usuario usuario = usuarioService.getUsuario(login);
 
-        if (usuario == null || !usuario.getSenha().equals(senha)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (usuario == null) {
+            // Usuário não encontrado
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Usuário não encontrado"));
+        }
+
+        if (!usuario.getSenha().equals(senha)) {
+            // Senha inválida
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Senha inválida"));
         }
 
         // Gera o token JWT
@@ -39,8 +48,9 @@ public class LoginController {
                 .body(new LoginResponse(token, usuario));
     }
 
+
     // Criação do usuário continua igual
-    @PostMapping
+    @PostMapping("/cadastrar")
     public ResponseEntity<String> criarUsuario(@RequestBody Usuario usuario) {
         boolean criado = usuarioService.createUsuario(usuario);
         if (criado) {

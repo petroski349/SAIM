@@ -10,33 +10,24 @@ public class Usuario {
     String email;
     String senha;
     LocalDateTime dataRegistro;
-    char tipo;
+    String tipo;
 
-    public Usuario(long id, char tipo, LocalDateTime dataRegistro, String senha, String email, String nome) {
+    public Usuario(long id, String tipo, LocalDateTime dataRegistro, String senha, String email, String nome) {
         this.id = id;
         this.tipo = tipo;
         this.dataRegistro = dataRegistro;
         this.senha = senha;
         this.email = email;
-        this.nome = nome;
     }
 
     public Usuario() {}
 
-    public char getTipo() {
+    public String getTipo() {
         return tipo;
     }
 
-    public void setTipo(char tipo) {
+    public void setTipo(String tipo) {
         this.tipo = tipo;
-    }
-
-    public LocalDateTime getDataRegistro() {
-        return dataRegistro;
-    }
-
-    public void setDataRegistro(LocalDateTime dataRegistro) {
-        this.dataRegistro = dataRegistro;
     }
 
     public String getSenha() {

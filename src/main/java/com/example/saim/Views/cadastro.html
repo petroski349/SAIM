@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login e Cadastro</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="container">
+    <h2>Login / Cadastro</h2>
+    
+    <div id="message" class="message"></div>
+    
+    <!-- Formulário de login -->
+    <form id="form-login" class="form">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Senha" required />
+      <button type="submit">Entrar</button>
+    </form>
+    
+    <!-- Formulário de cadastro -->
+    <form id="form-register" class="form">
+      <input type="text" id="nome" placeholder="Nome (para cadastro)" required />
+      <input type="email" id="email-register" placeholder="Email" required />
+      <input type="password" id="password-register" placeholder="Senha" required />
+      
+      <!-- Campo de seleção para o tipo -->
+      <select id="tipo-register" required>
+        <option value="">Selecione o Tipo</option>
+        <option value="Administrador">Administrador</option>
+        <option value="Médico">Médico</option>
+        <option value="Funcionário">Funcionário</option>
+      </select>
+      
+      <button type="submit">Cadastrar</button>
+    </form>
+    
+    <!-- Exibição das informações do usuário logado -->
+    <div id="user-info" class="user-info" style="display:none;">
+      <h3>Usuário logado:</h3>
+      <p><strong>ID:</strong> <span id="user-id"></span></p>
+      <p><strong>Email:</strong> <span id="user-email"></span></p>
+      <p><strong>Nome:</strong> <span id="user-nome"></span></p>
+      <p><strong>Tipo:</strong> <span id="user-tipo"></span></p>
+      <p><strong>Data Registro:</strong> <span id="user-data"></span></p>
+      <button id="logout-btn">Sair</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
