@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAIM - Hospital Bezerra de Menezes</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+
+    .top-header {
+      background-color: white;
+      padding: 1rem 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .top-header h1 {
+      font-size: 1.75rem;
+      font-weight: bold;
+      color: #212529;
+    }
+
+    .top-header .contact-info i {
+      margin-right: 0.5rem;
+    }
+
+    .nav-link.active {
+      background-color: #dc3545;
+      color: white !important;
+    }
+
+    .main-banner {
+      background: #007bff;
+      color: white;
+      padding: 3rem 0;
+      text-align: center;
+    }
+
+    .main-banner h2 {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    .card-title {
+      font-weight: 600;
+    }
+
+    footer {
+      background-color: #212529;
+      color: #adb5bd;
+      text-align: center;
+      padding: 1rem 0;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Top Header -->
+<div class="top-header">
+  <div class="container d-flex justify-content-between align-items-center flex-wrap">
+    <div class="d-flex align-items-center">
+      <img src="https://www.associacaobezerra.com.br/images/logo.png" alt="Logo" height="50" class="me-2" />
+      <h1 class="mb-0">Associação Assistencial Adolpho Bezerra de Menezes</h1>
+    </div>
+    <!--div class="contact-info text-end">
+      <div><i class="bi bi-telephone-fill"></i> (18) 3902-4111</div>
+      <div><i class="bi bi-geo-alt-fill"></i> R. Quinze de Novembro, 650 - Vila Dubus, Pres. Prudente - SP</div>
+      <div><i class="bi bi-envelope-fill"></i> bezerrademenezesadm@gmail.com</div>
+    </div-->
+  </div>
+</div>
+
+<!-- Nav Menu -->
+<nav class="navbar navbar-expand-lg navbar-light border-top border-bottom" style="background-color: #e3f2fd;">
+  <div class="container">
+    <ul class="navbar-nav mx-auto">
+      <li class="nav-item"><a class="nav-link active" href="#">Início</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Sobre nós</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Portal da Transparência</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Publicações</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Quero Ajudar</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Fale Conosco</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- Banner >
+<div class="main-banner">
+  <div class="container">
+    <h2>SAIM - Sistema de Acesso a Informação em Saúde Mental</h2>
+  </div>
+</div-->
+
+<!-- Painel de Gestão -->
+<div class="container my-5">
+  <h2 class="text-center mb-4">Painel de Gestão</h2>
+  <div class="row g-4">
+    <div class="col-md-4">
+      <a href="CadastrarPaciente.html" class="text-decoration-none">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-person-vcard fs-1 text-primary"></i>
+            <h5 class="card-title mt-3">Gestão de Pacientes</h5>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="CadastrarVisitante.html" class="text-decoration-none">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-person-lines-fill fs-1 text-success"></i>
+            <h5 class="card-title mt-3">Gestão de Visitantes</h5>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="#" class="text-decoration-none">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-gear-wide-connected fs-1 text-warning"></i>
+            <h5 class="card-title mt-3">Parametrização</h5>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="#" class="text-decoration-none">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-person-lock fs-1 text-danger"></i>
+            <h5 class="card-title mt-3">Usuários e Login</h5>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="#" class="text-decoration-none">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-cash-stack fs-1 text-info"></i>
+            <h5 class="card-title mt-3">Contas</h5>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="#" class="text-decoration-none">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center">
+            <i class="bi bi-clipboard2-pulse fs-1 text-secondary"></i>
+            <h5 class="card-title mt-3">Gestão de Médicos</h5>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <p>&copy; 2025 Hospital Bezerra de Menezes. Todos os direitos reservados.</p>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

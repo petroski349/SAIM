@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Efetuar Consulta</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 260px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    form input, button {
+      display: block;
+      width: 100%;
+      padding: 6px;
+      margin-top: 8px;
+      font-size: 13px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #mensagem {
+      margin-top: 12px;
+      text-align: center;
+      font-weight: bold;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Efetuar Consulta</h1>
+    <form id="consultaForm">
+      <input type="number" placeholder="CRM do Médico" name="medCRM" required>
+      <input type="text" placeholder="Nome do Médico" name="medNome" required>
+      <input type="text" placeholder="Especialidade" name="medEspecialidade" required>
+      <input type="date" name="conData" required>
+      <input type="number" placeholder="Horário (ex: 14)" name="horarioConsulta" required>
+      <input type="text" placeholder="Nome do Paciente" name="paciNome" required>
+      <input type="text" placeholder="CPF do Paciente" name="paciCPF" required>
+      <input type="number" placeholder="Código do Convênio" name="paciConvenio" required>
+      <input type="number" placeholder="Número do Convênio" name="numConvenio" required>
+      <input type="date" name="dataUltimaConsulta" required>
+      <input type="text" placeholder="Tipo de Consulta (ex: A)" name="conTipo" maxlength="1" required>
+      <button type="submit">Enviar</button>
+    </form>
+    <div id="mensagem"></div>
+  </div>
+
+  <script>
+    document.getElementById('consultaForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const dados = {
+        medCRM: parseInt(form.medCRM.value),
+        medNome: form.medNome.value,
+        medEspecialidade: form.medEspecialidade.value,
+        conData: form.conData.value,
+        horarioConsulta: parseInt(form.horarioConsulta.value),
+        paciNome: form.paciNome.value,
+        paciCPF: form.paciCPF.value,
+        paciConvenio: parseInt(form.paciConvenio.value),
+        numConvenio: parseInt(form.numConvenio.value),
+        dataUltimaConsulta: form.dataUltimaConsulta.value,
+        conTipo: form.conTipo.value.charAt(0)
+      };
+
+      fetch('http://localhost:8080/api/consulta2/efetuar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(res => res.json())
+      .then(res => {
+        const msg = document.getElementById('mensagem');
+        if (res.success) {
+          msg.textContent = '✅ Consulta registrada com sucesso!';
+          msg.style.color = 'green';
+          form.reset();
+        } else {
+          msg.textContent = '❌ Erro ao registrar consulta: ' + (res.error || 'Verifique os dados.');
+          msg.style.color = 'red';
+        }
+      })
+      .catch(err => {
+        const msg = document.getElementById('mensagem');
+        msg.textContent = '❌ Erro na comunicação com o servidor.';
+        msg.style.color = 'red';
+        console.error(err);
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Agendar Consulta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f4f6f9;
+      padding: 40px 10px;
+    }
+
+    .container-form {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+      margin: auto;
+      position: relative;
+    }
+
+    .form-label {
+      font-weight: 600;
+    }
+
+    .btn + .btn {
+      margin-left: 10px;
+    }
+
+    .alert {
+      margin-top: 20px;
+    }
+
+    .btn-voltar {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+    }
+
+
+    #listaConsultas {
+      margin-top: 30px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    #listaConsultas table {
+      width: 100%;
+    }
+
+    #listaConsultas th, #listaConsultas td {
+      padding: 8px 12px;
+      text-align: left;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container-form">
+
+    <a href="CadastrarVisitante.html" class="btn btn-outline-secondary btn-sm btn-voltar">
+      <i class="bi bi-arrow-left-circle"></i> Voltar
+    </a>
+
+    <h2 class="text-center mb-4 text-primary"><i class="bi bi-calendar2-plus-fill me-2"></i>Agendar Consulta</h2>
+
+
+    <div class="mb-3">
+      <label for="inputBusca" class="form-label">Buscar por Código da Consulta ou ID do Médico</label>
+      <div class="input-group">
+        <input type="text" id="inputBusca" class="form-control" placeholder="Digite Código ou ID Médico...">
+        <button class="btn btn-outline-primary" type="button" id="btnBuscar">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+    </div>
+
+    <div id="resultadoBusca"></div>
+    <div id="botaoAtualizarBusca" class="mt-2" style="display:none;">
+      <button class="btn btn-secondary btn-sm" id="btnAtualizar">
+        <i class="bi bi-arrow-clockwise me-1"></i> Atualizar Lista
+      </button>
+    </div>
+
+    <form id="formConsulta" novalidate class="needs-validation">
+
+      <div class="mb-3">
+        <label for="conCod" class="form-label">Código da Consulta (para Alterar/Excluir)</label>
+        <input type="number" id="conCod" name="conCod" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label for="medId" class="form-label">ID do Médico</label>
+        <input type="number" id="medId" name="medId" class="form-control" required>
+        <div class="invalid-feedback">Informe o ID do médico.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="paciConvenio" class="form-label">Convênio</label>
+        <input type="text" id="paciConvenio" name="paciConvenio" class="form-control" required>
+        <div class="invalid-feedback">Informe o convênio.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="conTipo" class="form-label">Tipo da Consulta</label>
+        <select id="conTipo" name="conTipo" class="form-select" required>
+          <option value="">Selecione...</option>
+          <option value="Rotina">Rotina</option>
+          <option value="Internação">Internação</option>
+        </select>
+        <div class="invalid-feedback">Selecione um tipo de consulta.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="conData" class="form-label">Data da Consulta</label>
+        <input type="date" id="conData" name="conData" class="form-control" required>
+        <div class="invalid-feedback">Escolha a data da consulta.</div>
+      </div>
+
+      <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4 flex-wrap">
+        <button type="button" class="btn btn-primary" onclick="agendarConsulta()">
+          <i class="bi bi-check-circle-fill me-1"></i> Agendar
+        </button>
+        <button type="button" class="btn btn-success" onclick="alterarConsulta()">
+          <i class="bi bi-pencil-square me-1"></i> Alterar
+        </button>
+        <button type="button" class="btn btn-danger" onclick="excluirConsulta()">
+          <i class="bi bi-trash-fill me-1"></i> Excluir
+        </button>
+        <button type="button" class="btn btn-warning text-white mt-2 mt-md-0" onclick="limparFormulario()">
+          <i class="bi bi-x-circle me-1"></i> Limpar
+        </button>
+        <button type="button" class="btn btn-info mt-2 mt-md-0" onclick="listarConsultas()">
+          <i class="bi bi-card-list me-1"></i> Listar Consultas
+        </button>
+      </div>
+    </form>
+
+    <div id="mensagem"></div>
+
+
+    <div id="listaConsultas"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function showMensagem(texto, tipo) {
+      const div = document.getElementById("mensagem");
+      div.innerHTML = `
+        <div class="alert alert-${tipo} alert-dismissible fade show" role="alert">
+          <i class="bi ${tipo === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>
+          ${texto}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+        </div>
+      `;
+    }
+
+    function getDadosConsulta() {
+      return {
+        conCod: document.getElementById("conCod").value || null,
+        medId: document.getElementById("medId").value,
+        paciConvenio: document.getElementById("paciConvenio").value,
+        conTipo: document.getElementById("conTipo").value,
+        conData: document.getElementById("conData").value
+      };
+    }
+
+    function agendarConsulta() {
+      const form = document.getElementById("formConsulta");
+      if (!form.checkValidity()) {
+        form.classList.add("was-validated");
+        return;
+      }
+
+      const dados = getDadosConsulta();
+      fetch("http://localhost:8080/api/consultas/agendar", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          showMensagem("Consulta agendada com sucesso!", "success");
+          limparFormulario();
+          listarConsultas();  
+        } else {
+          throw new Error(data.error || "Erro ao agendar.");
+        }
+      })
+      .catch(err => {
+        showMensagem("Erro ao agendar consulta.", "danger");
+        console.error(err);
+      });
+    }
+
+    document.getElementById("conCod").addEventListener("blur", function() {
+      const conCod = this.value.trim();
+      if (!conCod) {
+      
+        limparFormulario();
+        return;
+      }
+
+      fetch(`http://localhost:8080/api/consultas/${conCod}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Consulta não encontrada");
+          }
+          return response.json();
+        })
+        .then(data => {
+          document.getElementById("medId").value = data.medId;
+          document.getElementById("paciConvenio").value = data.paciConvenio;
+          document.getElementById("conTipo").value = data.conTipo;
+          document.getElementById("conData").value = data.conData;
+          document.getElementById("mensagem").innerHTML = "";
+          document.getElementById("formConsulta").classList.remove("was-validated");
+        })
+        .catch(err => {
+          limparFormulario();
+          showMensagem("Consulta não encontrada com esse código.", "warning");
+          console.error(err);
+        });
+    });
+
+    function alterarConsulta() {
+      const form = document.getElementById("formConsulta");
+      if (!form.checkValidity()) {
+        form.classList.add("was-validated");
+        return;
+      }
+
+      const dados = getDadosConsulta();
+      if (!dados.conCod) {
+        showMensagem("Informe o código da consulta para alterar.", "warning");
+        return;
+      }
+
+      fetch("http://localhost:8080/api/consultas/alterar", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          showMensagem("Consulta alterada com sucesso!", "success");
+          limparFormulario();
+          listarConsultas();  
+        } else {
+          throw new Error(data.error || "Erro ao alterar.");
+        }
+      })
+      .catch(err => {
+        showMensagem("Erro ao alterar consulta.", "danger");
+        console.error(err);
+      });
+    }
+
+    function excluirConsulta() {
+      const conCod = document.getElementById("conCod").value;
+
+      if (!conCod) {
+        showMensagem("Informe o código da consulta para excluir.", "warning");
+        return;
+      }
+
+      fetch(`http://localhost:8080/api/consultas/excluir/${conCod}`, {
+        method: "DELETE",
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          showMensagem("Consulta excluída com sucesso!", "success");
+          limparFormulario();
+          listarConsultas();  
+        } else {
+          throw new Error(data.error || "Erro ao excluir.");
+        }
+      })
+      .catch(err => {
+        showMensagem("Erro ao excluir consulta.", "danger");
+        console.error(err);
+      });
+    }
+
+    function limparFormulario() {
+      const form = document.getElementById("formConsulta");
+      form.reset();
+      form.classList.remove("was-validated");
+      document.getElementById("mensagem").innerHTML = "";
+    }
+
+    function listarConsultas() {
+      fetch("http://localhost:8080/api/consultas/listar")
+        .then(res => res.json())
+        .then(data => {
+          if (!Array.isArray(data)) {
+            showMensagem("Falha ao carregar lista de consultas.", "danger");
+            return;
+          }
+
+          if(data.length === 0) {
+            document.getElementById("listaConsultas").innerHTML = `<p class="text-center mt-3">Nenhuma consulta encontrada.</p>`;
+            return;
+          }
+
+          let tabela = `
+            <table class="table table-striped table-hover mt-4">
+              <thead class="table-primary">
+                <tr>
+                  <th>Código</th>
+                  <th>ID Médico</th>
+                  <th>Convênio</th>
+                  <th>Tipo</th>
+                  <th>Data</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          data.forEach(c => {
+            tabela += `
+              <tr>
+                <td>${c.conCod}</td>
+                <td>${c.medId}</td>
+                <td>${c.paciConvenio}</td>
+                <td>${c.conTipo}</td>
+                <td>${new Date(c.conData).toLocaleDateString('pt-BR')}</td>
+              </tr>
+            `;
+          });
+
+          tabela += `
+              </tbody>
+            </table>
+          `;
+
+          document.getElementById("listaConsultas").innerHTML = tabela;
+
+          
+          document.getElementById("resultadoBusca").innerHTML = "";
+          document.getElementById("botaoAtualizarBusca").style.display = "none";
+          document.getElementById("listaConsultas").style.display = "block";
+        })
+        .catch(err => {
+          showMensagem("Erro ao carregar lista de consultas.", "danger");
+          console.error(err);
+        });
+    }
+
+    document.getElementById("btnBuscar").addEventListener("click", () => {
+      const termo = document.getElementById("inputBusca").value.trim();
+
+      if (!termo) {
+        alert("Digite um Código da Consulta ou ID do Médico para buscar.");
+        return;
+      }
+
+      fetch("http://localhost:8080/api/consultas/listar")
+        .then(res => {
+          if (!res.ok) throw new Error("Erro ao buscar consultas");
+          return res.json();
+        })
+        .then(data => {
+          const resultado = data.filter(c => 
+            String(c.conCod).includes(termo) || String(c.medId).includes(termo)
+          );
+
+          if (resultado.length === 0) {
+            document.getElementById("resultadoBusca").innerHTML = `<p class="text-muted mt-3">Nenhuma consulta encontrada para o termo "<strong>${termo}</strong>".</p>`;
+          } else {
+            let tabela = `
+              <table class="table table-bordered table-hover mt-3">
+                <thead class="table-secondary">
+                  <tr>
+                    <th>Código</th>
+                    <th>ID Médico</th>
+                    <th>Convênio</th>
+                    <th>Tipo</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody>
+            `;
+
+            resultado.forEach(c => {
+              tabela += `
+                <tr>
+                  <td>${c.conCod}</td>
+                  <td>${c.medId}</td>
+                  <td>${c.paciConvenio}</td>
+                  <td>${c.conTipo}</td>
+                  <td>${new Date(c.conData).toLocaleDateString('pt-BR')}</td>
+                </tr>
+              `;
+            });
+
+            tabela += `
+                </tbody>
+              </table>
+            `;
+
+            document.getElementById("resultadoBusca").innerHTML = tabela;
+          }
+
+      
+          document.getElementById("botaoAtualizarBusca").style.display = "block";
+
+          document.getElementById("listaConsultas").style.display = "none";
+        })
+        .catch(err => {
+          document.getElementById("resultadoBusca").innerHTML = `<p class="text-danger mt-3">Erro ao buscar consultas.</p>`;
+          console.error(err);
+        });
+    });
+
+    document.getElementById("btnAtualizar").addEventListener("click", () => {
+      document.getElementById("resultadoBusca").innerHTML = "";
+      document.getElementById("botaoAtualizarBusca").style.display = "none";
+      document.getElementById("listaConsultas").style.display = "block";
+      document.getElementById("inputBusca").value = "";
+      listarConsultas();
+    });
+
+    
+    //window.onload = () => {
+    //  listarConsultas();
+    //};
+  </script>
+
+</body>
+</html>
