@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cadastro de Visitante</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css"
+  />
+
+  
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
+  <div class="container">
+    <a class="navbar-brand" href="#">Sistema de Visitantes</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu"
+      aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="AgendarConsulta.html">Agendar Consulta</a></li>
+        <li class="nav-item"><a class="nav-link" href="AgendarVisita.html">Agendar Visita</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container position-relative" style="min-height: 100vh;">
+
+
+  <div class="card p-4 shadow-lg rounded-4 mt-5">
+    <h2 class="text-center mb-4">Cadastro de Visitante</h2>
+    
+    <form id="formVisitante" novalidate>
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label for="visiCod" class="form-label">Código</label>
+          <input type="number" id="visiCod" class="form-control">
+        </div>
+
+        <div class="col-md-9">
+          <label for="visiNome" class="form-label">Nome:</label>
+          <input type="text" id="visiNome" class="form-control" required>
+        </div>
+
+        <div class="col-md-4">
+          <label for="visiCPF" class="form-label">CPF:</label>
+          <input type="text" id="visiCPF" maxlength="14" class="form-control" required>
+          <div class="invalid-feedback">CPF inválido.</div>
+        </div>
+
+        <div class="col-md-8">
+          <label for="visiEmail" class="form-label">Email:</label>
+          <input type="email" id="visiEmail" class="form-control">
+        </div>
+
+        <div class="col-md-4">
+          <label for="visiTelefone" class="form-label">Telefone:</label>
+          <input type="text" id="visiTelefone" maxlength="15" class="form-control">
+        </div>
+
+        <div class="col-md-8">
+          <label for="visiEndereco" class="form-label">Endereço:</label>
+          <input type="text" id="visiEndereco" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+          <label for="visiCep" class="form-label">CEP:</label>
+          <input type="text" id="visiCep" maxlength="9" class="form-control">
+          <div id="mensagem-cep" class="form-text text-danger"></div>
+        </div>
+
+        <div class="col-md-4">
+          <label for="visiDataCadastro" class="form-label">Data de Cadastro:</label>
+          <input type="date" id="visiDataCadastro" class="form-control">
+        </div>
+
+        <div class="col-md-5">
+          <label for="visiDataNascimento" class="form-label">Data de Nascimento:</label>
+          <input type="date" id="visiDataNascimento" class="form-control">
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button type="button" id="btnCadastrar" class="btn btn-success">Cadastrar</button>
+        <button type="button" id="btnAlterar" class="btn btn-warning text-white">Alterar</button>
+        <button type="button" id="btnExcluir" class="btn btn-danger">Excluir</button>
+        <button type="reset" id="btnLimpar" class="btn btn-secondary">Limpar</button>
+        <button type="button" class="btn btn-info" onclick="location.reload();">Atualizar</button>
+        <button type="button" class="btn btn-info mt-2 mt-md-0" onclick="carregarVisitantes()">
+        <i class="bi bi-card-list me-1"></i> Listar Visitantes
+        </button>
+
+      </div>
+
+      <div id="mensagemErro" class="alert d-none mt-3" role="alert"></div>
+    </form>
+  </div>
+
+  <div class="card mt-5 shadow rounded-4 p-4">
+    <table id="tabelaVisitantes" class="display table table-striped" style="width:100%">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>CPF</th>
+          <th>Email</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>CEP</th>
+          <th>Data Cadastro</th>
+          <th>Data Nascimento</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal fade" id="modalSucesso" tabindex="-1" aria-labelledby="modalSucessoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title" id="modalSucessoLabel">Sucesso!</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Visitante cadastrado com sucesso!
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalConfirmarExclusao" tabindex="-1" aria-labelledby="modalConfirmarExclusaoLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="modalConfirmarExclusaoLabel">Confirmar Exclusão</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        Tem certeza que deseja excluir este visitante?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmarExcluir">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+  const cpfInput = document.getElementById("visiCPF");
+  const erroDiv = document.getElementById("mensagemErro");
+  const modalSucesso = new bootstrap.Modal(document.getElementById("modalSucesso"));
+  const modalConfirmarExclusao = new bootstrap.Modal(document.getElementById('modalConfirmarExclusao'));
+  let dataTable;
+
+
+  cpfInput.addEventListener("input", function (e) {
+    let value = e.target.value.replace(/\D/g, "").slice(0, 11);
+    value = value.replace(/(\d{3})(\d)/, "$1.$2")
+                 .replace(/(\d{3})(\d)/, "$1.$2")
+                 .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    e.target.value = value;
+  });
+
+  document.getElementById("visiTelefone").addEventListener("input", function (e) {
+    let v = e.target.value.replace(/\D/g, "").slice(0, 11);
+    e.target.value = v.length <= 10 
+      ? v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3")
+      : v.replace(/(\d{2})(\d{5})(\d{0,4})/, "($1) $2-$3");
+  });
+
+  document.getElementById("visiCep").addEventListener("input", function (e) {
+    let v = e.target.value.replace(/\D/g, "").slice(0, 8);
+    e.target.value = v.replace(/(\d{5})(\d)/, "$1-$2");
+  });
+
+  document.getElementById('visiCep').addEventListener('blur', function () {
+    const cep = this.value.replace(/\D/g, '');
+    const avisoCep = document.getElementById("mensagem-cep");
+    if (cep.length !== 8) {
+      avisoCep.textContent = "CEP inválido. Digite 8 números.";
+      return;
+    }
+    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+      .then(resp => resp.json())
+      .then(data => {
+        if (data.erro) {
+          avisoCep.textContent = "CEP não encontrado.";
+        } else {
+          avisoCep.textContent = "";
+          document.getElementById("visiEndereco").value =
+            `${data.logradouro}, ${data.bairro}, ${data.localidade} - ${data.uf}`;
+        }
+      })
+      .catch(() => avisoCep.textContent = "Erro ao buscar o CEP.");
+  });
+
+  function limparCPF(cpf) {
+    return cpf.replace(/[^\d]/g, "");
+  }
+
+  function cpfValido(cpf) {
+    cpf = limparCPF(cpf);
+    if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
+    let soma = 0;
+    for (let i = 0; i < 9; i++) soma += +cpf[i] * (10 - i);
+    let resto = 11 - (soma % 11);
+    if (resto >= 10) resto = 0;
+    if (resto !== +cpf[9]) return false;
+
+    soma = 0;
+    for (let i = 0; i < 10; i++) soma += +cpf[i] * (11 - i);
+    resto = 11 - (soma % 11);
+    if (resto >= 10) resto = 0;
+    return resto === +cpf[10];
+  }
+
+      $('#visiCPF').on('input', function () {
+        let value = $(this).val().replace(/\D/g, '');
+        if (value.length > 11) value = value.slice(0, 11);
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        $(this).val(value);
+      });
+
+
+  document.getElementById("btnLimpar").addEventListener("click", () => {
+    document.getElementById("formVisitante").reset();
+
+    document.getElementById("mensagemErro").textContent = "";
+    document.getElementById("mensagemErro").classList.add("d-none");
+    document.getElementById("mensagem-cep").textContent = "";
+    document.getElementById("visiCPF").classList.remove("is-invalid");
+  });
+
+
+  function carregarFormulario(visitante) {
+    document.getElementById("visiCod").value = visitante.visiCod || "";
+    document.getElementById("visiNome").value = visitante.visiNome || "";
+    document.getElementById("visiCPF").value = visitante.visiCPF || "";
+    document.getElementById("visiEmail").value = visitante.visiEmail || "";
+    document.getElementById("visiTelefone").value = visitante.visiTelefone || "";
+    document.getElementById("visiEndereco").value = visitante.visiEndereco || "";
+    document.getElementById("visiCep").value = visitante.visiCep || "";
+    document.getElementById("visiDataCadastro").value = visitante.visiDataCadastro || "";
+    document.getElementById("visiDataNascimento").value = visitante.visiDataNascimento || "";
+    cpfInput.classList.remove("is-invalid");
+    erroDiv.classList.add("d-none");
+  }
+
+    document.getElementById("btnCadastrar").addEventListener("click", function () {
+      const cpfInput = document.getElementById("visiCPF").value;
+      const cpfLimpo = limparCPF(cpfInput);
+
+      if (!cpfValido(cpfLimpo)) {
+        document.getElementById("mensagemErro").textContent = "CPF inválido!";
+        return;
+      }
+
+      const visitante = {
+        visiNome: document.getElementById("visiNome").value,
+        visiCPF: cpfLimpo,
+        visiEmail: document.getElementById("visiEmail").value,
+        visiTelefone: document.getElementById("visiTelefone").value,
+        visiEndereco: document.getElementById("visiEndereco").value,
+        visiCep: document.getElementById("visiCep").value,
+        visiData_Cadastro: document.getElementById("visiDataCadastro").value,
+        visiData_Nascimento: document.getElementById("visiDataNascimento").value
+      };
+
+      fetch("http://localhost:8080/api/visitantes/cadastrar", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(visitante)
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("Visitante cadastrado com sucesso!");
+            document.getElementById("mensagemErro").textContent = "";
+          } else {
+            document.getElementById("mensagemErro").textContent = data.error || "Erro ao cadastrar.";
+          }
+        })
+        .catch(error => {
+          console.error("Erro:", error);
+          document.getElementById("mensagemErro").textContent = "Erro ao cadastrar.";
+        });
+    });
+
+  document.getElementById("btnAlterar").addEventListener("click", () => {
+    const visiCod = document.getElementById("visiCod").value;
+    if (!visiCod) {
+      alert("Informe o código para alterar.");
+      return;
+    }
+    const visitante = {
+      visiNome: document.getElementById("visiNome").value.trim(),
+      visiCPF: document.getElementById("visiCPF").value.trim(),
+      visiEmail: document.getElementById("visiEmail").value.trim(),
+      visiTelefone: document.getElementById("visiTelefone").value.trim(),
+      visiEndereco: document.getElementById("visiEndereco").value.trim(),
+      visiCep: document.getElementById("visiCep").value.trim(),
+      visiDataCadastro: document.getElementById("visiDataCadastro").value,
+      visiDataNascimento: document.getElementById("visiDataNascimento").value,
+    };
+
+    if (!visitante.visiNome) {
+      erroDiv.textContent = "Nome é obrigatório.";
+      erroDiv.classList.remove("d-none");
+      return;
+    }
+    if (!cpfValido(visitante.visiCPF)) {
+      cpfInput.classList.add("is-invalid");
+      erroDiv.textContent = "CPF inválido.";
+      erroDiv.classList.remove("d-none");
+      return;
+    }
+
+    erroDiv.classList.add("d-none");
+    cpfInput.classList.remove("is-invalid");
+
+    fetch("http://localhost:8080/api/visitantes/alterar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(visitante),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao alterar visitante");
+        return res.json();
+      })
+      .then(() => {
+        carregarVisitantes();
+        alert("Visitante alterado com sucesso.");
+      })
+      .catch((err) => {
+        erroDiv.textContent = err.message;
+        erroDiv.classList.remove("d-none");
+      });
+  });
+
+  document.getElementById("btnExcluir").addEventListener("click", () => {
+    const visiCod = document.getElementById("visiCod").value;
+    if (!visiCod) {
+      alert("Informe o código para excluir.");
+      return;
+    }
+    modalConfirmarExclusao.show();
+  });
+
+  document.getElementById("confirmarExcluir").addEventListener("click", () => {
+    const visiCod = document.getElementById("visiCod").value;
+
+    fetch(`http://localhost:8080/api/visitantes/excluir/${visiCod}`, {
+      method: "DELETE",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao excluir visitante");
+        modalConfirmarExclusao.hide();
+        carregarVisitantes();
+        document.getElementById("formVisitante").reset();
+        alert("Visitante excluído com sucesso.");
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
+  });
+
+  function carregarVisitantes() {
+    fetch("http://localhost:8080/api/visitantes/listar",{
+      method: "GET",
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao carregar visitantes");
+        return res.json();
+      })
+      .then((data) => {
+        if ($.fn.dataTable.isDataTable("#tabelaVisitantes")) {
+          dataTable.clear().rows.add(data).draw();
+        } else {
+          dataTable = $("#tabelaVisitantes").DataTable({
+            data: data,
+            columns: [
+              { data: "visiCod" },
+              { data: "visiNome" },
+              { data: "visiCPF" },
+              { data: "visiEmail" },
+              { data: "visiTelefone" },
+              { data: "visiEndereco" },
+              { data: "visiCep" },
+              { data: "visiDataCadastro" },
+              { data: "visiDataNascimento" }
+            ],
+            language: {
+              url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
+            },
+            lengthMenu: [5, 10, 25, 50],
+            pageLength: 5,
+            responsive: true,
+            createdRow: function (row, data) {
+              $(row).css("cursor", "pointer");
+              $(row).on("click", () => {
+                carregarFormulario(data);
+              });
+            }
+          });
+        }
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
+  }
+
+ // window.onload = carregarVisitantes;
+</script>
+
+</body>
+</html>
