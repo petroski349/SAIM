@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Prontuário do Paciente</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+<div class="cabecalho">
+    <h2>Informações do Colaborador</h2>
+    <p>Nome: <span id="nomeColaborador"></span> | Cargo: <span id="cargoColaborador"></span> | CRM: <span id="crmColaborador"></span></p>
+</div>
+
+<div class="bloco-busca">
+    <label>CPF do Paciente: <input type="text" id="cpfBusca"></label>
+    <label>ou Nome: <input type="text" id="nomeBusca"></label>
+    <button onclick="buscarPaciente()">Buscar Paciente</button>
+</div>
+
+<div class="container">
+    <div class="historico">
+        <h3>Histórico do Paciente</h3>
+        <div id="historicoDados">Nenhum paciente selecionado.</div>
+    </div>
+    <div class="tooltip" onmouseenter="carregarPrescricao()">
+        <button class="tooltip-button">💊 Ver Prescrição</button>
+        <div class="tooltip-content" id="tooltipPrescricao">
+            Consulta
+        </div>
+    </div>
+
+
+    <div class="consulta">
+        <h3>Atualização de Prontuário</h3>
+        <textarea id="anotacaoConsulta" placeholder="Descreva o que ocorreu..."></textarea>
+        <button onclick="salvarProntuario()">Salvar</button>
+    </div>
+</div>
+
+<script src="prontuario.js"></script>
+</body>
+</html>
