@@ -5,9 +5,9 @@ import java.sql.DriverManager;
 
 public class Conexao {
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/saim_db";
+    private static final String URL = "jdbc:postgresql://localhost:5432/setup_db";
     private static final String USUARIO = "postgres";
-    private static final String SENHA = "123";
+    private static final String SENHA = "postgres123";
 
     public static Connection conectar() {
         try {

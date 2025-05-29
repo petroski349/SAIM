@@ -2,6 +2,7 @@ package back;
 
 public class Usuario {
         private int id;
+        private String tipo;
         private String nome;
         private String cargo;
         private String crm;
@@ -45,5 +46,15 @@ public class Usuario {
 
     public void setCpf(String cpf) {
         this.cpf = cpf;
+    }
+
+    public void setSenha(String senha) {
+    }
+
+    public void setTipo(String admin) {
+    }
+
+    public String getTipo() {
+    return tipo;
     }
 }

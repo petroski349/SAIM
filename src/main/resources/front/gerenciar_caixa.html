@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Caixa</title>
+    <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+    <!-- Incluir cabeçalho -->
+    <div id="cabecalho-container"></div>
+
+    <div class="container">
+        <h1>Gerenciamento de Caixa</h1>
+        
+        <!-- Status do Caixa -->
+        <div id="status-caixa" class="card">
+            <h2>Status do Caixa</h2>
+            <div id="caixa-fechado" class="status-info">
+                <p>O caixa está fechado no momento.</p>
+                <button id="abrirCaixaBtn" class="btn btn-primary">Abrir Caixa</button>
+            </div>
+            <div id="caixa-aberto" class="status-info" style="display: none;">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Status:</span>
+                        <span class="value status-aberto">Aberto</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Aberto em:</span>
+                        <span class="value" id="data-abertura"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Saldo Inicial:</span>
+                        <span class="value" id="saldo-inicial"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Saldo Atual:</span>
+                        <span class="value" id="saldo-atual"></span>
+                    </div>
+                </div>
+                <button id="fecharCaixaBtn" class="btn btn-danger">Fechar Caixa</button>
+                <button id="atualizarSaldoBtn" class="btn btn-secondary">Atualizar Saldo</button>
+            </div>
+        </div>
+
+        <!-- Movimentações do Caixa -->
+        <div id="movimentacoes-caixa" class="card">
+            <h2>Movimentações</h2>
+            <div class="actions">
+                <button id="novaEntradaBtn" class="btn btn-success" disabled>Nova Entrada</button>
+                <button id="novaSaidaBtn" class="btn btn-warning" disabled>Nova Saída</button>
+            </div>
+            
+            <div class="table-container">
+                <table id="movimentacoes-tabela">
+                    <thead>
+                        <tr>
+                            <th>Data/Hora</th>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="movimentacoes-lista">
+                        <tr>
+                            <td colspan="4" class="text-center">Nenhuma movimentação registrada</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Abrir Caixa -->
+    <div id="abrirCaixaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Abrir Caixa</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="abrirCaixaForm">
+                    <div class="form-group">
+                        <label for="saldoInicial">Saldo Inicial (R$):</label>
+                        <input type="number" id="saldoInicial" name="saldoInicial" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="observacoesAbertura">Observações:</label>
+                        <textarea id="observacoesAbertura" name="observacoesAbertura" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelarAbertura" class="btn btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Confirmar Abertura</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Fechar Caixa -->
+    <div id="fecharCaixaModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Fechar Caixa</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="resumo-caixa">
+                    <p><strong>Saldo Inicial:</strong> <span id="resumo-saldo-inicial"></span></p>
+                    <p><strong>Total Entradas:</strong> <span id="resumo-entradas"></span></p>
+                    <p><strong>Total Saídas:</strong> <span id="resumo-saidas"></span></p>
+                    <p><strong>Saldo Final:</strong> <span id="resumo-saldo-final"></span></p>
+                </div>
+                <form id="fecharCaixaForm">
+                    <div class="form-group">
+                        <label for="observacoesFechamento">Observações:</label>
+                        <textarea id="observacoesFechamento" name="observacoesFechamento" rows="3"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelarFechamento" class="btn btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Confirmar Fechamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Nova Movimentação -->
+    <div id="movimentacaoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="movimentacaoTitulo">Nova Movimentação</h2>
+                <span class="close-btn">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="movimentacaoForm">
+                    <input type="hidden" id="tipoMovimentacao" name="tipoMovimentacao">
+                    <div class="form-group">
+                        <label for="valorMovimentacao">Valor (R$):</label>
+                        <input type="number" id="valorMovimentacao" name="valorMovimentacao" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricaoMovimentacao">Descrição:</label>
+                        <input type="text" id="descricaoMovimentacao" name="descricaoMovimentacao" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="cancelarMovimentacao" class="btn btn-secondary">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Registrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="gerenciar_caixa.js"></script>
+</body>
+</html>
