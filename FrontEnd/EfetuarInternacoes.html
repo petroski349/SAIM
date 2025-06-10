@@ -11,7 +11,6 @@
       background-color: #f4f6f9;
       padding: 40px 10px;
     }
-
     .container-form {
       background: #fff;
       padding: 30px;
@@ -21,17 +20,14 @@
       margin: auto;
       position: relative;
     }
-
     .btn-voltar {
       position: absolute;
       top: 15px;
       right: 15px;
     }
-
     .form-label {
       font-weight: 600;
     }
-
     .alert {
       margin-top: 20px;
     }
@@ -55,20 +51,25 @@
     </div>
 
     <div class="mb-3">
+      <label for="paciCPF" class="form-label">CPF do Paciente</label>
+      <div class="input-group">
+        <input type="text" id="paciCPF" name="paciCPF" class="form-control" required>
+        <button type="button" class="btn btn-outline-secondary" onclick="buscarPacientePorCPF()">
+          <i class="bi bi-search"></i> Buscar
+        </button>
+      </div>
+      <div class="invalid-feedback">Informe o CPF do paciente.</div>
+    </div>
+
+    <div class="mb-3">
       <label for="paciNome" class="form-label">Nome do Paciente</label>
-      <input type="text" id="paciNome" name="paciNome" class="form-control" required>
-      <div class="invalid-feedback">Informe o nome do paciente.</div>
+      <input type="text" id="paciNome" name="paciNome" class="form-control" required readonly>
     </div>
 
     <div class="mb-3">
       <label for="dataEntrada" class="form-label">Data de Entrada</label>
       <input type="date" id="dataEntrada" name="dataEntrada" class="form-control" required>
       <div class="invalid-feedback">Informe a data de entrada.</div>
-    </div>
-
-    <div class="mb-3">
-      <label for="dataSaida" class="form-label">Data de Saída</label>
-      <input type="date" id="dataSaida" name="dataSaida" class="form-control">
     </div>
 
     <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4 flex-wrap">
@@ -110,10 +111,49 @@
   function getDadosInternacao() {
     return {
       prontuarioId: document.getElementById("prontuarioId").value,
+      paciCPF: document.getElementById("paciCPF").value,
       paciNome: document.getElementById("paciNome").value,
-      dataEntrada: document.getElementById("dataEntrada").value,
-      dataSaida: document.getElementById("dataSaida").value
+      dataEntrada: document.getElementById("dataEntrada").value
     };
+  }
+
+  function buscarPacientePorCPF() {
+    const cpf = document.getElementById("paciCPF").value;
+    if (!cpf) {
+      showMensagem("Informe o CPF para buscar.", "warning");
+      return;
+    }
+
+    fetch(`http://localhost:8080/api/pacientes/buscarCPF/${cpf}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Paciente não encontrado.");
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById("paciNome").value = data.paciNome || "";
+        showMensagem("Paciente encontrado com sucesso.", "success");
+      })
+      .catch(err => {
+        showMensagem("Paciente não encontrado com este CPF.", "danger");
+        console.error(err);
+      });
+  }
+
+    document.addEventListener("DOMContentLoaded", function () {
+    aplicarMascaraCPF(document.getElementById("paciCPF"));
+  });
+
+    function aplicarMascaraCPF(campo) {
+    campo.addEventListener("input", function () {
+      let valor = campo.value.replace(/\D/g, ""); // Remove tudo que não é dígito
+      if (valor.length > 11) valor = valor.slice(0, 11);
+
+      valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+      valor = valor.replace(/(\d{3})(\d)/, "$1.$2");
+      valor = valor.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+
+      campo.value = valor;
+    });
   }
 
   function efetuarInternacao() {
@@ -130,13 +170,13 @@
       body: JSON.stringify(dados)
     })
     .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        showMensagem("Internação efetuada com sucesso!", "success");
+    .then(result => {
+      if (result.success) {
+        showMensagem(result.message || "Internação realizada com sucesso!", "success");
         limparFormulario();
         listarInternacoes();
       } else {
-        throw new Error(data.error || "Erro ao efetuar internação.");
+        showMensagem(result.error || "Paciente não cadastrado ou erro ao internar.", "danger");
       }
     })
     .catch(err => {
@@ -145,58 +185,53 @@
     });
   }
 
-  function alterarInternacao() {
-    const dados = getDadosInternacao();
-    if (!dados.prontuarioId) {
-      showMensagem("Informe o ID do prontuário para alterar.", "warning");
-      return;
-    }
-
-    fetch("http://localhost:8080/api/internacoes/alterar", {
-      method: "PUT",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dados)
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        showMensagem("Internação alterada com sucesso!", "success");
-        limparFormulario();
-        listarInternacoes();
-      } else {
-        throw new Error(data.error || "Erro ao alterar internação.");
-      }
-    })
-    .catch(err => {
-      showMensagem("Erro ao alterar internação.", "danger");
-      console.error(err);
-    });
-  }
-
   function excluirInternacao() {
-    const prontuarioId = document.getElementById("prontuarioId").value;
-    if (!prontuarioId) {
+    const id = document.getElementById("prontuarioId").value;
+    if (!id) {
       showMensagem("Informe o ID do prontuário para excluir.", "warning");
       return;
     }
 
-    fetch(`http://localhost:8080/api/internacoes/excluir/${prontuarioId}`, {
+    if (!confirm("Deseja excluir esta internação?")) return;
+
+    fetch(`http://localhost:8080/api/internacoes/excluir/${id}`, {
       method: "DELETE"
     })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        showMensagem("Internação excluída com sucesso!", "success");
-        limparFormulario();
-        listarInternacoes();
-      } else {
-        throw new Error(data.error || "Erro ao excluir internação.");
-      }
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          showMensagem("Internação excluída com sucesso.", "success");
+          limparFormulario();
+          listarInternacoes();
+        } else {
+          showMensagem(result.error || "Erro ao excluir internação.", "danger");
+        }
+      })
+      .catch(err => {
+        showMensagem("Erro ao excluir internação.", "danger");
+        console.error(err);
+      });
+  }
+
+  function excluirInternacaoPorId(id) {
+    if (!confirm("Deseja excluir a internação com ID " + id + "?")) return;
+
+    fetch(`http://localhost:8080/api/internacoes/excluir/${id}`, {
+      method: "DELETE"
     })
-    .catch(err => {
-      showMensagem("Erro ao excluir internação.", "danger");
-      console.error(err);
-    });
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          showMensagem("Internação excluída com sucesso.", "success");
+          listarInternacoes();
+        } else {
+          showMensagem(result.error || "Erro ao excluir internação.", "danger");
+        }
+      })
+      .catch(err => {
+        showMensagem("Erro ao excluir internação.", "danger");
+        console.error(err);
+      });
   }
 
   function limparFormulario() {
@@ -206,68 +241,48 @@
   }
 
   function listarInternacoes() {
-  fetch("http://localhost:8080/api/internacoes/listar")
-    .then(res => {
-      if (!res.ok) {
-        throw new Error('Erro na resposta da API');
-      }
-      return res.json();
-    })
-    .then(data => {
-      console.log("Dados recebidos:", data); 
-
-      if (!Array.isArray(data)) {
-        showMensagem("Falha ao carregar lista de internações.", "danger");
-        return;
-      }
-
-      if (data.length === 0) {
-        document.getElementById("listaInternacoes").innerHTML =
-          '<p class="text-center mt-3">Nenhuma internação encontrada.</p>';
-        return;
-      }
-
-      let tabela = `
-        <table class="table table-striped table-hover mt-4">
-          <thead class="table-primary">
-            <tr>
-              <th>Nome do Paciente</th>
-              <th>Data de Entrada</th>
-              <th>Data de Saída</th>
-              <th>ID do Prontuário</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
-
-      data.forEach(i => {
-        tabela += `
-          <tr>
-            <td>${i.paciNome}</td>
-            <td>${i.dataEntrada ? new Date(i.dataEntrada).toLocaleDateString('pt-BR') : ""}</td>
-            <td>${i.dataSaida ? new Date(i.dataSaida).toLocaleDateString('pt-BR') : "Ainda internado"}</td>
-            <td>${i.prontuarioId}</td>
-          </tr>
-        `;
+    fetch("http://localhost:8080/api/internacoes/listar")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const tabela = `
+            <div class="table-responsive mt-4">
+              <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>Prontuário ID</th>
+                    <th>Nome</th>
+                    <th>Data Entrada</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${data.map(internacao => `
+                    <tr>
+                      <td>${internacao.prontuarioId}</td>
+                      <td>${internacao.paciNome}</td>
+                      <td>${internacao.dataEntrada}</td>
+                      <td>
+                        <button class="btn btn-sm btn-danger" onclick="excluirInternacaoPorId(${internacao.prontuarioId})">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+          document.getElementById("listaInternacoes").innerHTML = tabela;
+        } else {
+          document.getElementById("listaInternacoes").innerHTML = "<p class='text-muted mt-3'>Nenhuma internação encontrada.</p>";
+        }
+      })
+      .catch(err => {
+        showMensagem("Erro ao listar internações.", "danger");
+        console.error(err);
       });
-
-      tabela += `
-          </tbody>
-        </table>
-      `;
-
-      document.getElementById("listaInternacoes").innerHTML = tabela;
-    })
-    .catch(err => {
-      showMensagem("Erro ao carregar lista de internações.", "danger");
-      console.error("Erro no fetch:", err);
-    });
   }
-
-
-    //window.onload = () => {
-    //  listarInternacoes();
-    //};
 </script>
 </body>
 </html>

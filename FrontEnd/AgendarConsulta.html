@@ -42,7 +42,6 @@
       right: 15px;
     }
 
-
     #listaConsultas {
       margin-top: 30px;
       max-height: 300px;
@@ -70,7 +69,6 @@
 
     <h2 class="text-center mb-4 text-primary"><i class="bi bi-calendar2-plus-fill me-2"></i>Agendar Consulta</h2>
 
-
     <div class="mb-3">
       <label for="inputBusca" class="form-label">Buscar por Código da Consulta ou ID do Médico</label>
       <div class="input-group">
@@ -95,11 +93,20 @@
         <input type="number" id="conCod" name="conCod" class="form-control">
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 position-relative">
+      <label for="pacienteInput" class="form-label">Paciente</label>
+      <input type="text" id="pacienteInput" class="form-control" placeholder="Digite o nome/cpf do paciente..." autocomplete="off" required>
+      <input type="hidden" id="pacienteId" name="pacienteId" required>
+      <div class="invalid-feedback">Selecione um paciente válido.</div>
+      <div id="sugestoesPaciente" class="list-group position-absolute w-100 z-3" style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+
+    <div class="mb-3">
         <label for="medId" class="form-label">ID do Médico</label>
         <input type="number" id="medId" name="medId" class="form-control" required>
         <div class="invalid-feedback">Informe o ID do médico.</div>
       </div>
+
 
       <div class="mb-3">
         <label for="paciConvenio" class="form-label">Convênio</label>
@@ -123,6 +130,15 @@
         <div class="invalid-feedback">Escolha a data da consulta.</div>
       </div>
 
+      <div class="mb-3">
+        <label for="conHorario" class="form-label">Horário da Consulta</label>
+        <input type="time" id="conHorario" name="conHorario" class="form-control" required>
+        <div class="invalid-feedback">Escolha o horário da consulta.</div>
+      </div>
+
+      
+
+
       <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4 flex-wrap">
         <button type="button" class="btn btn-primary" onclick="agendarConsulta()">
           <i class="bi bi-check-circle-fill me-1"></i> Agendar
@@ -143,7 +159,6 @@
     </form>
 
     <div id="mensagem"></div>
-
 
     <div id="listaConsultas"></div>
   </div>
@@ -168,9 +183,12 @@
         medId: document.getElementById("medId").value,
         paciConvenio: document.getElementById("paciConvenio").value,
         conTipo: document.getElementById("conTipo").value,
-        conData: document.getElementById("conData").value
+        conData: document.getElementById("conData").value,
+        conHorario: document.getElementById("conHorario").value,
+        paciId: document.getElementById("pacienteId").value
       };
     }
+    
 
     function agendarConsulta() {
       const form = document.getElementById("formConsulta");
@@ -204,7 +222,6 @@
     document.getElementById("conCod").addEventListener("blur", function() {
       const conCod = this.value.trim();
       if (!conCod) {
-      
         limparFormulario();
         return;
       }
@@ -221,6 +238,8 @@
           document.getElementById("paciConvenio").value = data.paciConvenio;
           document.getElementById("conTipo").value = data.conTipo;
           document.getElementById("conData").value = data.conData;
+          document.getElementById("conHorario").value = data.conHorario;
+          document.getElementById("pacienteId").value = data.paciId;
           document.getElementById("mensagem").innerHTML = "";
           document.getElementById("formConsulta").classList.remove("was-validated");
         })
@@ -254,7 +273,7 @@
         if (data.success) {
           showMensagem("Consulta alterada com sucesso!", "success");
           limparFormulario();
-          listarConsultas();  
+          listarConsultas();
         } else {
           throw new Error(data.error || "Erro ao alterar.");
         }
@@ -267,22 +286,24 @@
 
     function excluirConsulta() {
       const conCod = document.getElementById("conCod").value;
-
       if (!conCod) {
         showMensagem("Informe o código da consulta para excluir.", "warning");
         return;
       }
 
+      if (!confirm("Confirma exclusão da consulta?")) {
+        return;
+      }
+
       fetch(`http://localhost:8080/api/consultas/excluir/${conCod}`, {
-        method: "DELETE",
-        headers: { 'Content-Type': 'application/json' }
+        method: "DELETE"
       })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           showMensagem("Consulta excluída com sucesso!", "success");
           limparFormulario();
-          listarConsultas();  
+          listarConsultas();
         } else {
           throw new Error(data.error || "Erro ao excluir.");
         }
@@ -294,28 +315,22 @@
     }
 
     function limparFormulario() {
-      const form = document.getElementById("formConsulta");
-      form.reset();
-      form.classList.remove("was-validated");
+      document.getElementById("formConsulta").reset();
+      document.getElementById("formConsulta").classList.remove("was-validated");
       document.getElementById("mensagem").innerHTML = "";
+      document.getElementById("listaConsultas").innerHTML = "";
     }
 
     function listarConsultas() {
       fetch("http://localhost:8080/api/consultas/listar")
         .then(res => res.json())
         .then(data => {
-          if (!Array.isArray(data)) {
-            showMensagem("Falha ao carregar lista de consultas.", "danger");
+          if (!Array.isArray(data) || data.length === 0) {
+            document.getElementById("listaConsultas").innerHTML = "<p>Nenhuma consulta encontrada.</p>";
             return;
           }
-
-          if(data.length === 0) {
-            document.getElementById("listaConsultas").innerHTML = `<p class="text-center mt-3">Nenhuma consulta encontrada.</p>`;
-            return;
-          }
-
-          let tabela = `
-            <table class="table table-striped table-hover mt-4">
+          let html = `
+            <table class="table table-striped table-hover">
               <thead class="table-primary">
                 <tr>
                   <th>Código</th>
@@ -323,119 +338,109 @@
                   <th>Convênio</th>
                   <th>Tipo</th>
                   <th>Data</th>
+                  <th>Horário</th>
+                  <th>ID Paciente</th>
                 </tr>
               </thead>
               <tbody>
           `;
-
           data.forEach(c => {
-            tabela += `
+            html += `
               <tr>
                 <td>${c.conCod}</td>
                 <td>${c.medId}</td>
                 <td>${c.paciConvenio}</td>
                 <td>${c.conTipo}</td>
-                <td>${new Date(c.conData).toLocaleDateString('pt-BR')}</td>
+                <td>${c.conData}</td>
+                <td>${c.conHorario}</td>
+                <td>${c.paciId}</td>
               </tr>
             `;
           });
-
-          tabela += `
-              </tbody>
-            </table>
-          `;
-
-          document.getElementById("listaConsultas").innerHTML = tabela;
-
-          
-          document.getElementById("resultadoBusca").innerHTML = "";
-          document.getElementById("botaoAtualizarBusca").style.display = "none";
-          document.getElementById("listaConsultas").style.display = "block";
+          html += "</tbody></table>";
+          document.getElementById("listaConsultas").innerHTML = html;
         })
         .catch(err => {
-          showMensagem("Erro ao carregar lista de consultas.", "danger");
+          document.getElementById("listaConsultas").innerHTML = "<p>Erro ao listar consultas.</p>";
           console.error(err);
         });
     }
 
-    document.getElementById("btnBuscar").addEventListener("click", () => {
-      const termo = document.getElementById("inputBusca").value.trim();
+    let listaPacientes = [];
 
-      if (!termo) {
-        alert("Digite um Código da Consulta ou ID do Médico para buscar.");
+function carregarPacientes() {
+  fetch("http://localhost:8080/api/pacientes/listar")
+    .then(res => res.json())
+    .then(data => {
+      listaPacientes = data;
+    })
+    .catch(err => {
+      console.error("Erro ao carregar pacientes", err);
+    });
+}
+
+// Autocomplete ao digitar
+document.getElementById("pacienteInput").addEventListener("input", function () {
+  const termo = this.value.toLowerCase();
+  const sugestoes = document.getElementById("sugestoesPaciente");
+  sugestoes.innerHTML = "";
+
+  if (termo.length === 0) {
+    document.getElementById("pacienteId").value = "";
+    return;
+  }
+
+  const filtrados = listaPacientes.filter(p =>
+    p.paciNome.toLowerCase().includes(termo) || p.paciCPF.includes(termo)
+  );
+
+  filtrados.forEach(p => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "list-group-item list-group-item-action";
+    item.textContent = `${p.paciNome} (CPF: ${p.paciCPF})`;
+    item.addEventListener("click", () => {
+      document.getElementById("pacienteInput").value = `${p.paciNome} (CPF: ${p.paciCPF})`;
+      document.getElementById("pacienteId").value = p.paciId;
+      sugestoes.innerHTML = "";
+    });
+    sugestoes.appendChild(item);
+  });
+});
+
+
+  document.getElementById("btnBuscar").addEventListener("click", () => {
+  const filtro = document.getElementById("inputBusca").value.trim();
+  if (!filtro) return;
+  // Exemplo simples: pode buscar por consulta ou médico conforme o valor
+  fetch(`http://localhost:8080/api/consultas?filtro=${encodeURIComponent(filtro)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!Array.isArray(data) || data.length === 0) {
+        document.getElementById("resultadoBusca").innerHTML = "<p>Nenhum resultado encontrado.</p>";
         return;
       }
-
-      fetch("http://localhost:8080/api/consultas/listar")
-        .then(res => {
-          if (!res.ok) throw new Error("Erro ao buscar consultas");
-          return res.json();
-        })
-        .then(data => {
-          const resultado = data.filter(c => 
-            String(c.conCod).includes(termo) || String(c.medId).includes(termo)
-          );
-
-          if (resultado.length === 0) {
-            document.getElementById("resultadoBusca").innerHTML = `<p class="text-muted mt-3">Nenhuma consulta encontrada para o termo "<strong>${termo}</strong>".</p>`;
-          } else {
-            let tabela = `
-              <table class="table table-bordered table-hover mt-3">
-                <thead class="table-secondary">
-                  <tr>
-                    <th>Código</th>
-                    <th>ID Médico</th>
-                    <th>Convênio</th>
-                    <th>Tipo</th>
-                    <th>Data</th>
-                  </tr>
-                </thead>
-                <tbody>
-            `;
-
-            resultado.forEach(c => {
-              tabela += `
-                <tr>
-                  <td>${c.conCod}</td>
-                  <td>${c.medId}</td>
-                  <td>${c.paciConvenio}</td>
-                  <td>${c.conTipo}</td>
-                  <td>${new Date(c.conData).toLocaleDateString('pt-BR')}</td>
-                </tr>
-              `;
-            });
-
-            tabela += `
-                </tbody>
-              </table>
-            `;
-
-            document.getElementById("resultadoBusca").innerHTML = tabela;
-          }
-
-      
-          document.getElementById("botaoAtualizarBusca").style.display = "block";
-
-          document.getElementById("listaConsultas").style.display = "none";
-        })
-        .catch(err => {
-          document.getElementById("resultadoBusca").innerHTML = `<p class="text-danger mt-3">Erro ao buscar consultas.</p>`;
-          console.error(err);
-        });
+      // Monta tabela ou lista semelhante ao listarConsultas()
+      let html = '<ul class="list-group">';
+      data.forEach(c => {
+        html += `<li class="list-group-item">Consulta #${c.conCod} - Médico ID: ${c.medId} - Paciente ID: ${c.paciId}</li>`;
+      });
+      html += '</ul>';
+      document.getElementById("resultadoBusca").innerHTML = html;
+      document.getElementById("botaoAtualizarBusca").style.display = "block";
+    })
+    .catch(err => {
+      document.getElementById("resultadoBusca").innerHTML = "<p>Erro ao buscar consultas.</p>";
+      console.error(err);
     });
+});
 
-    document.getElementById("btnAtualizar").addEventListener("click", () => {
-      document.getElementById("resultadoBusca").innerHTML = "";
-      document.getElementById("botaoAtualizarBusca").style.display = "none";
-      document.getElementById("listaConsultas").style.display = "block";
-      document.getElementById("inputBusca").value = "";
-      listarConsultas();
-    });
 
-    
-    //window.onload = () => {
-    //  listarConsultas();
-    //};
+    // Inicialização
+    window.onload = () => {
+      carregarPacientes();
+    };
+
   </script>
 
 </body>
